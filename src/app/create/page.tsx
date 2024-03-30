@@ -3,6 +3,7 @@ import { Container, Stack, Title } from "@mantine/core";
 import { redirect } from "next/navigation";
 import Form from "./form";
 
+// TODO: Make this page modular (create and edit)
 export default async function Page() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
@@ -14,7 +15,7 @@ export default async function Page() {
   return (
     <Stack>
       <Title>Create New Survey</Title>
-      <Form/>
+      <Form />
     </Stack>
   );
 }
