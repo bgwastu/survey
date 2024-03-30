@@ -5,24 +5,34 @@
   "scripts": {
     "prepare": "panda codegen",
     "dev": "rm -rf .next && next dev",
-    "build": "next build",
+    "build": "drizzle-kit push:sqlite && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:push": "drizzle-kit push:sqlite",
+    "db:migrate": "drizzle-kit generate:sqlite",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@kinde-oss/kinde-auth-nextjs": "^2.2.2",
     "@mantine/core": "^7.7.1",
     "@mantine/form": "^7.7.1",
     "@mantine/hooks": "^7.7.1",
     "@mantine/notifications": "^7.7.1",
+    "dotenv": "^16.4.5",
+    "install": "^0.13.0",
+    "nanoid": "^5.0.6",
     "next": "14.1.4",
+    "openai": "^4.31.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@pandacss/dev": "^0.36.1",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "drizzle-kit": "^0.20.14",
     "eslint": "^8",
     "eslint-config-next": "14.1.4",
     "typescript": "^5"
