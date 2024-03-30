@@ -1,7 +1,14 @@
-import type { Metadata } from "next";
 import "./index.css";
 import "@mantine/core/styles.css";
-import { ColorSchemeScript, createTheme, MantineProvider } from "@mantine/core";
+import "@mantine/notifications/styles.css";
+import type { Metadata } from "next";
+import { Notifications } from "@mantine/notifications";
+import {
+  ColorSchemeScript,
+  Container,
+  createTheme,
+  MantineProvider,
+} from "@mantine/core";
 
 export const metadata: Metadata = {
   title: "Survey App",
@@ -28,6 +35,8 @@ const theme = createTheme({
       "#7f522b",
     ],
   },
+  primaryColor: "brand",
+  primaryShade: 7,
 });
 
 export default function RootLayout({
@@ -42,7 +51,10 @@ export default function RootLayout({
       </head>
       <body>
         <MantineProvider theme={theme}>
-          {children}
+          <Container my={40} size="sm">
+            {children}
+          </Container>
+          <Notifications />
         </MantineProvider>
       </body>
     </html>
