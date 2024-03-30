@@ -8,6 +8,13 @@
       "when": 1711792763032,
       "tag": "0000_sweet_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1711806365907,
+      "tag": "0001_known_silvermane",
+      "breakpoints": true
     }
   ]
 }

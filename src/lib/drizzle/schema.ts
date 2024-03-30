@@ -1,4 +1,4 @@
-import { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { customAlphabet } from "nanoid";
 
@@ -12,6 +12,9 @@ export const survey = sqliteTable("survey", {
   title: text("title").notNull(),
   background: text("background").notNull(),
   objectives: text("objectives").notNull(),
+  isActive: integer("is_active", {
+    mode: "boolean",
+  }).default(true).notNull(),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
