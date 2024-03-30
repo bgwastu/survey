@@ -25,8 +25,6 @@ export async function createSurvey(_: any, formData: FormData) {
     };
   }
 
-  console.log("Creating survey");
-
   const validated = schema.safeParse({
     title: formData.get("title"),
     background: formData.get("background"),

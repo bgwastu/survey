@@ -33,8 +33,6 @@ export default async function Page({ params }: { params: { id: string } }) {
     .from(conversation)
     .where(eq(conversation.surveyId, currentSurvey.id));
 
-  console.log(currentSurvey.objectives);
-
   return (
     <Stack>
       <Title>{currentSurvey.title}</Title>
