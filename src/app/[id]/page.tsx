@@ -1,13 +1,19 @@
 import { db } from "@/lib/drizzle/db";
-import {
-  conversation,
-  survey
-} from "@/lib/drizzle/schema";
+import { conversation, survey } from "@/lib/drizzle/schema";
 import { css } from "@/styled-system/css";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { Box, Button, Flex, Stack, Text, Title } from "@mantine/core";
+import {
+  Box,
+  Button,
+  CopyButton,
+  Flex,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { IconCopy } from "@tabler/icons-react";
 import { and, eq } from "drizzle-orm";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 export default async function Page({ params }: { params: { id: string } }) {
@@ -58,7 +64,9 @@ export default async function Page({ params }: { params: { id: string } }) {
       </Box>
 
       <Flex gap="sm">
-        <Button leftSection={<IconCopy size={20} />}>Copy survey URL</Button>
+        <Button component={Link} href={`/s/${currentSurvey.id}`}>
+          Go to survey
+        </Button>
         <Button color="red" variant="outline">
           Remove Survey
         </Button>
