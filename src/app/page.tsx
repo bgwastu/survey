@@ -4,7 +4,7 @@ import { db } from "@/lib/drizzle/db";
 import { survey } from "@/lib/drizzle/schema";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { Button, Container, Flex, Stack, Title, Text } from "@mantine/core";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import ItemSurvey from "./item-survey";
 import Link from "next/link";
@@ -12,7 +12,7 @@ import Link from "next/link";
 export default async function Home() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
-  
+
   if (!user) {
     redirect("/api/auth/login?post_login_redirect_url=/");
   }
@@ -21,7 +21,8 @@ export default async function Home() {
   const surveys = await db
     .select()
     .from(survey)
-    .where(eq(survey.userId, user.id));
+    .where(eq(survey.userId, user.id))
+    .orderBy(desc(survey.createdAt));
 
   return (
     <Stack>
