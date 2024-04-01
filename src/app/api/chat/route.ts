@@ -1,8 +1,8 @@
 import OpenAI from "openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
-import { openai } from "@/lib/openai";
+import { ask, openai } from "@/lib/openai";
 import { db } from "@/lib/drizzle/db";
-import { conversation, survey } from "@/lib/drizzle/schema";
+import { conversation, Survey, survey } from "@/lib/drizzle/schema";
 import { and, eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
@@ -46,13 +46,11 @@ export async function POST(req: Request) {
     });
 
     const stream = OpenAIStream(response, {
-      // TODO: Save the conversation to the database when the conversation is completed
       onCompletion: async (completion) => {
         const isFinished = completion.includes("[STOP]");
 
         if (isFinished) {
-          // TODO: make a summary of the conversation
-          const summary = "";
+          const summary = await getSurveySummary(messages, currentSurvey);
 
           // Save the conversation to the database
           await db.insert(conversation).values({
@@ -67,5 +65,38 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error(error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+async function getSurveySummary(
+  messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+  survey: Survey,
+) {
+  const strMessages = messages.map((message) =>
+    message.role + ": " + message.content
+  ).join("\n");
+
+  const prompt =
+    `As an AI assistant, your task is to provide an exclusive summary of the conversation you held with the user.
+
+  Details of the survey are as follows:
+  Title:
+  ${survey.title}
+  Background:
+  ${survey.background}
+  Objectives:
+  ${survey.objectives}
+
+  Below is the transcript of the conversation:
+  """
+  ${strMessages}
+  """`;
+
+  const [status, summary] = await ask(prompt, "");
+  if (status === "success") {
+    return summary;
+  } else {
+    // TODO: handle error (using notification or logging)
+    return "Failed to generate a summary";
   }
 }
