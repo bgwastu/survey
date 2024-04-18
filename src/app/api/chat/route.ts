@@ -35,34 +35,18 @@ export async function POST(req: Request) {
       - Provide clarification when needed.
       - Ensure all objectives are addressed.
       - Respond with "[STOP]" when all objectives are fulfilled.
+      - Maintain a conversational tone as if you were chatting through a messaging app.
       
       Ensure that all objectives are met while maintaining a conversational and engaging tone.`,
     };
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-3.5-turbo",
       stream: true,
       messages: [system, ...messages],
     });
 
-    const stream = OpenAIStream(response, {
-      // TODO: Save the conversation to the database when the conversation is completed
-      onCompletion: async (completion) => {
-        const isFinished = completion.includes("[STOP]");
-
-        if (isFinished) {
-          // TODO: make a summary of the conversation
-          const summary = "";
-
-          // Save the conversation to the database
-          await db.insert(conversation).values({
-            surveyId: currentSurvey.id,
-            chatHistoryJson: JSON.stringify(messages),
-            summary,
-          });
-        }
-      },
-    });
+    const stream = OpenAIStream(response);
     return new StreamingTextResponse(stream);
   } catch (error) {
     console.error(error);

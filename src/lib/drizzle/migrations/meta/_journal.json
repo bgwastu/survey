@@ -15,6 +15,13 @@
       "when": 1711806365907,
       "tag": "0001_known_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1713414799277,
+      "tag": "0002_wonderful_preak",
+      "breakpoints": true
     }
   ]
 }

@@ -21,7 +21,6 @@ export const survey = sqliteTable("survey", {
 export const conversation = sqliteTable("conversation", {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
   surveyId: text("survey_id").references(() => survey.id),
-  summary: text("summary").notNull(),
   chatHistoryJson: text("chat_history_json").notNull(),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
