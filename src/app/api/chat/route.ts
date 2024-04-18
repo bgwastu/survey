@@ -46,7 +46,20 @@ export async function POST(req: Request) {
       messages: [system, ...messages],
     });
 
-    const stream = OpenAIStream(response);
+    const stream = OpenAIStream(response, {
+      onCompletion: async (completion) => {
+        const isFinished = completion.includes("[STOP]");
+
+        // Save the conversation to the database
+        if (isFinished) {
+          await db.insert(conversation).values({
+            surveyId: currentSurvey.id,
+            chatHistoryJson: JSON.stringify(messages),
+          });
+        }
+      },
+    });
+
     return new StreamingTextResponse(stream);
   } catch (error) {
     console.error(error);
