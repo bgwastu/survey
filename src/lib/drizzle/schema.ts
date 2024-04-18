@@ -10,16 +10,21 @@ export const survey = sqliteTable("survey", {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
   userId: text("user_id").notNull(),
   title: text("title").notNull(),
+  description: text("description").notNull(),
   background: text("background").notNull(),
   objectives: text("objectives").notNull(),
+  targetAudiences: text("target_audiences").notNull(),
+  preferredLanguages: text("preferred_languages").notNull(),
+  initialFormJson: text("initial_form_json").notNull(),
   isActive: integer("is_active", {
     mode: "boolean",
-  }).default(true).notNull(),
+  }).default(false).notNull(),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
 export const conversation = sqliteTable("conversation", {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
+  fingerprintId: text("fingerprint_id").notNull(),
   surveyId: text("survey_id").references(() => survey.id),
   chatHistoryJson: text("chat_history_json").notNull(),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),

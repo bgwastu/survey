@@ -8,6 +8,7 @@ import { eq, desc } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import ItemSurvey from "./item-survey";
 import Link from "next/link";
+import CreateSurveyButton from "./create-survey-button";
 
 export default async function Home() {
   const { getUser } = getKindeServerSession();
@@ -28,9 +29,7 @@ export default async function Home() {
     <Stack>
       <Flex justify="space-between">
         <Title>My Survey</Title>
-        <Button component={Link} href="/create">
-          New Survey
-        </Button>
+        <CreateSurveyButton />
       </Flex>
       {surveys.length === 0 ? (
         <Text>No survey found.</Text>

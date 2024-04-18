@@ -1,0 +1,1 @@
+ALTER TABLE survey ADD `background` text NOT NULL;

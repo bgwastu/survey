@@ -5,29 +5,31 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import {
   Box,
   Button,
-  CopyButton,
   Flex,
   Stack,
   Text,
-  Title,
+  Title
 } from "@mantine/core";
-import { IconCopy } from "@tabler/icons-react";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({
+  params,
+}: {
+  params: { surveyId: string };
+}) {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
   if (!user) {
-    redirect("/api/auth/login?post_login_redirect_url=/" + params.id);
+    redirect("/api/auth/login?post_login_redirect_url=/" + params.surveyId);
   }
 
   const currentSurvey = await db
     .select()
     .from(survey)
-    .where(and(eq(survey.id, params.id), eq(survey.userId, user.id)))
+    .where(and(eq(survey.id, params.surveyId), eq(survey.userId, user.id)))
     .get();
 
   if (!currentSurvey) {
