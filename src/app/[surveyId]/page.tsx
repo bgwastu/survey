@@ -27,6 +27,8 @@ import {
   IconTableOff,
   IconX,
 } from "@tabler/icons-react";
+import DeleteSurveyButton from "./delete-survey-button";
+import CloseSurveyButton from "./close-survey-button";
 
 export default async function Page({
   params,
@@ -65,18 +67,12 @@ export default async function Page({
         <Group gap="xs">
           <Badge
             variant="dot"
-            color={survey.isActive ? "green" : "red"}
+            color={currentSurvey.isActive ? "green" : "red"}
             size="md"
           >
-            {survey.isActive ? "Survey Active" : "Survey Closed"}
+            {currentSurvey.isActive ? "Survey Active" : "Survey Closed"}
           </Badge>
-          <Button
-            variant="subtle"
-            color="red"
-            leftSection={<IconFlagX style={{ width: 16 }} />}
-          >
-            Close Survey
-          </Button>
+          <CloseSurveyButton surveyId={currentSurvey.id} isSurveyActive={currentSurvey.isActive} />
         </Group>
       </Stack>
 
@@ -125,9 +121,8 @@ export default async function Page({
       </Group>
       <Divider label="OR" />
       <Stack>
-        <Button color="red" variant="outline">
-          Remove Survey
-        </Button>
+        <Button variant="outline">Edit survey</Button>
+        <DeleteSurveyButton surveyId={currentSurvey.id} />
       </Stack>
     </Stack>
   );
