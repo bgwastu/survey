@@ -1,7 +1,7 @@
 import { db } from "@/lib/drizzle/db";
 import { survey } from "@/lib/drizzle/schema";
-import { Stack } from "@mantine/core";
-import { eq, and } from "drizzle-orm";
+import { Stack, Text } from "@mantine/core";
+import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import ChatPage from "./chat-page";
 
@@ -14,13 +14,22 @@ export default async function Page({
     .select({
       id: survey.id,
       title: survey.title,
+      isActive: survey.isActive,
     })
     .from(survey)
-    .where(and(eq(survey.id, params.surveyId), eq(survey.isActive, true)))
+    .where(eq(survey.id, params.surveyId))
     .get();
 
   if (!currentSurvey) {
     notFound();
+  }
+
+  if (!currentSurvey.isActive) {
+    return (
+      <Stack>
+        <Text>{`Survey "${currentSurvey.title}" is no longer accepting responses. Thank you for your participation!`}</Text>
+      </Stack>
+    );
   }
 
   return (
