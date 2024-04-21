@@ -6,29 +6,18 @@ import {
   Badge,
   Box,
   Button,
-  CopyButton,
   Divider,
-  Flex,
   Group,
   Stack,
-  Switch,
   Text,
-  Title,
+  Title
 } from "@mantine/core";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import ShareSurveyButton from "./share-survey-button";
-import {
-  IconCircleOff,
-  IconCircleX,
-  IconFlagX,
-  IconSquareX,
-  IconTableOff,
-  IconX,
-} from "@tabler/icons-react";
-import DeleteSurveyButton from "./delete-survey-button";
 import CloseSurveyButton from "./close-survey-button";
+import DeleteSurveyButton from "./delete-survey-button";
+import ShareSurveyButton from "./share-survey-button";
 
 export default async function Page({
   params,
@@ -72,7 +61,10 @@ export default async function Page({
           >
             {currentSurvey.isActive ? "Survey Active" : "Survey Closed"}
           </Badge>
-          <CloseSurveyButton surveyId={currentSurvey.id} isSurveyActive={currentSurvey.isActive} />
+          <CloseSurveyButton
+            surveyId={currentSurvey.id}
+            isSurveyActive={currentSurvey.isActive}
+          />
         </Group>
       </Stack>
 
@@ -121,7 +113,21 @@ export default async function Page({
       </Group>
       <Divider label="OR" />
       <Stack>
-        <Button variant="outline">Edit survey</Button>
+        <Stack gap={2}>
+          <Button
+            variant="outline"
+            disabled={currentSurvey.isActive}
+            component={Link}
+            href={`/${currentSurvey.id}/edit`}
+          >
+            Edit survey
+          </Button>
+          {currentSurvey.isActive ? (
+            <Text size="sm" c="dimmed">
+              You need to close the survey before you can edit it.
+            </Text>
+          ) : null}
+        </Stack>
         <DeleteSurveyButton surveyId={currentSurvey.id} />
       </Stack>
     </Stack>

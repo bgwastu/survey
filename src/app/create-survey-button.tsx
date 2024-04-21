@@ -45,7 +45,7 @@ export default function CreateSurveyButton() {
           return;
         }
 
-        await router.push(`/${data.id}/edit`);
+        await router.push(`/${data.id}/edit?create=true`);
       })
       .finally(() => setIsLoading(false));
   }

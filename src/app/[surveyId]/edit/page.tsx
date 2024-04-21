@@ -6,11 +6,12 @@ import { db } from "@/lib/drizzle/db";
 import { survey } from "@/lib/drizzle/schema";
 import { eq } from "drizzle-orm";
 
-// TODO: Make this page modular (create and edit)
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: { surveyId: string };
+  searchParams?: { create: string };
 }) {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
@@ -28,13 +29,16 @@ export default async function Page({
     notFound();
   }
 
-  if(currentSurvey.isActive){
-    return <Text>Survey need to be deactivated before editing.</Text>
+  if (currentSurvey.isActive) {
+    return <Text>Survey need to be deactivated before editing.</Text>;
   }
+
+  const isCreate = searchParams?.create === "true";
 
   return (
     <Stack>
-      <SurveyEditForm survey={currentSurvey}/>
+      <Title>{isCreate ? "Create new survey" : "Edit survey"}</Title>
+      <SurveyEditForm survey={currentSurvey} />
     </Stack>
   );
 }
