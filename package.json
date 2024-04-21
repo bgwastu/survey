@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "prepare": "panda codegen",
-    "dev": "rm -rf .next && next dev",
+    "dev": "rm -rf .next && next dev --turbo",
     "build": "drizzle-kit push:sqlite && next build",
     "start": "next start",
     "lint": "next lint",
