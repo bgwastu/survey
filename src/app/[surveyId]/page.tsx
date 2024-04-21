@@ -3,14 +3,16 @@ import { conversation, survey } from "@/lib/drizzle/schema";
 import { css } from "@/styled-system/css";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import {
+  ActionIcon,
   Badge,
   Box,
   Button,
   Divider,
+  Flex,
   Group,
   Stack,
   Text,
-  Title
+  Title,
 } from "@mantine/core";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
@@ -18,6 +20,8 @@ import { notFound, redirect } from "next/navigation";
 import CloseSurveyButton from "./close-survey-button";
 import DeleteSurveyButton from "./delete-survey-button";
 import ShareSurveyButton from "./share-survey-button";
+import { IconX } from "@tabler/icons-react";
+import { index } from "drizzle-orm/mysql-core";
 
 export default async function Page({
   params,
@@ -97,6 +101,26 @@ export default async function Page({
             );
           })}
         </Group>
+      </Box>
+      <Box>
+        <Text fw="bold">Initial Form:</Text>
+        {currentSurvey.initialFormJson === "[]" ? (
+          <Text>No Form</Text>
+        ) : (
+          <Stack gap={4}>
+            {JSON.parse(currentSurvey.initialFormJson).map(
+              (form: any, index: number) => (
+                <Flex key={form.title} gap="xs" align="center">
+                  <Text c="dimmed">{index + 1}.</Text>
+                  <Text>{form.title}</Text>
+                  <Badge variant="light">
+                    {form.type}
+                  </Badge>
+                </Flex>
+              )
+            )}
+          </Stack>
+        )}
       </Box>
       <Box>
         <Text fw="bold">Total Responses:</Text>

@@ -32,6 +32,8 @@ export default async function Page({
     );
   }
 
+  // TODO: add initial form
+
   return (
     <Stack>
       <ChatPage surveyId={currentSurvey.id} surveyTitle={currentSurvey.title} />

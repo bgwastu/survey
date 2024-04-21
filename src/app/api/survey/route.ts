@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
   const res = await db.insert(survey).values({
     userId: user.id,
-    initialFormJson: "{}",
+    initialFormJson: "[]",
     ...partialSurvey,
     preferredLanguages: "English,Bahasa Indonesia",
   }).returning({ id: survey.id }).execute();

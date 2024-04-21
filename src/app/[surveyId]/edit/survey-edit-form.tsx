@@ -1,23 +1,36 @@
 "use client";
 
+import { Survey } from "@/lib/drizzle/schema";
 import {
+  ActionIcon,
+  Badge,
+  Box,
   Button,
-  LoadingOverlay,
+  Divider,
+  Flex,
+  NativeSelect,
+  Overlay,
   Stack,
   TagsInput,
+  Text,
   Textarea,
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
+import { notifications, showNotification } from "@mantine/notifications";
+import { IconX } from "@tabler/icons-react";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
 import { updateSurvey } from "./action";
-import { Survey } from "@/lib/drizzle/schema";
 
-export default function SurveyEditForm({ survey }: { survey: Survey }) {
-  const [loading, setLoading] = useState(false);
-
+export default function SurveyEditForm({
+  survey,
+  // if the survey already has respondent, we cannot edit the initial form
+  alreadyHasRespondent,
+}: {
+  survey: Survey;
+  alreadyHasRespondent: boolean;
+}) {
   const form = useForm({
     initialValues: {
       title: survey.title,
@@ -37,23 +50,40 @@ export default function SurveyEditForm({ survey }: { survey: Survey }) {
     clearInputErrorOnChange: true,
   });
 
-  const [state, formAction] = useFormState(updateSurvey, null);
-  // useEffect(
-  //   function showNotificationError() {
-  //     if (state?.message) {
-  //       showNotification({
-  //         title: state.message.isError ? "Error" : "Information",
-  //         color: state.message.isError ? "red" : undefined,
-  //         message: state.message.text,
-  //       });
-  //     }
-  //   },
-  //   [state?.message]
-  // );
+  const { execute, result } = useAction(updateSurvey);
+  const [isLoading, setIsLoading] = useState(false);
+  const [listInitialForm, setListInitialForm] = useState<InitialForm[]>(
+    survey.initialFormJson ? JSON.parse(survey.initialFormJson) : []
+  );
+
+  useEffect(
+    function showNotificationError() {
+      if (result.data?.failure) {
+        showNotification({
+          title: "Error",
+          message: result.data.failure,
+          color: "red",
+        });
+      }
+    },
+    [result.data?.failure]
+  );
 
   return (
-    <form action={formAction}>
-      <LoadingOverlay visible={loading} />
+    <form
+      onSubmit={form.onSubmit((values) => {
+        setIsLoading(true);
+        execute({
+          ...values,
+          preferredLanguages: values.preferredLanguages.join(","),
+          id: survey.id,
+          initialFormJson: alreadyHasRespondent
+            ? survey.initialFormJson
+            : JSON.stringify(listInitialForm),
+        });
+        setIsLoading(false);
+      })}
+    >
       <Stack>
         <input type="hidden" name="id" value={survey.id} />
         <TextInput
@@ -61,7 +91,6 @@ export default function SurveyEditForm({ survey }: { survey: Survey }) {
           label="Title"
           placeholder="Your survey title"
           required
-          error={state?.errors?.title}
           {...form.getInputProps("title")}
         />
         <TextInput
@@ -70,7 +99,6 @@ export default function SurveyEditForm({ survey }: { survey: Survey }) {
           description="Concise description of the survey"
           placeholder="My survey is about..."
           required
-          error={state?.errors?.title}
           {...form.getInputProps("description")}
         />
         <Textarea
@@ -82,7 +110,6 @@ export default function SurveyEditForm({ survey }: { survey: Survey }) {
           placeholder="My survey is about..."
           rightSectionWidth={50}
           required
-          error={state?.errors?.background}
           {...form.getInputProps("background")}
         />
         <Textarea
@@ -94,7 +121,6 @@ export default function SurveyEditForm({ survey }: { survey: Survey }) {
           placeholder="Describe the target audience as detail as possible (age, gender, job title, location, education level, income level, etc)"
           rightSectionWidth={50}
           required
-          error={state?.errors?.background}
           {...form.getInputProps("targetAudiences")}
         />
         <Textarea
@@ -106,29 +132,142 @@ export default function SurveyEditForm({ survey }: { survey: Survey }) {
           placeholder="This survey aims to..."
           required
           rightSectionWidth={50}
-          error={state?.errors?.objectives}
           {...form.getInputProps("objectives")}
         />
         <TagsInput
           name="preferredLanguages"
           label="Preferred languages"
           required
-          description="Select the languages you want to use in your survey"
+          description="Select the languages you want to use in your survey conversation"
           {...form.getInputProps("preferredLanguages")}
         />
-        {/* TODO: add proper form json */}
-        <SubmitButton />
+        <InitialFormSelect
+          listInitialForm={listInitialForm}
+          setListInitialForm={setListInitialForm}
+          disabled={alreadyHasRespondent}
+        />
+        <Button variant="filled" type="submit" loading={isLoading}>
+          Publish Survey
+        </Button>
       </Stack>
     </form>
   );
 }
 
-function SubmitButton() {
-  const status = useFormStatus();
+type InitialForm = {
+  title: string;
+  type: "text" | "email" | "date" | "checkbox";
+};
 
+export function InitialFormSelect({
+  listInitialForm,
+  setListInitialForm,
+  disabled,
+}: {
+  listInitialForm: InitialForm[];
+  setListInitialForm: (initialForm: InitialForm[]) => void;
+  disabled: boolean;
+}) {
+  const [currentInput, setCurrentInput] = useState<string>("");
+  const [currentType, setCurrentType] = useState<
+    "text" | "email" | "date" | "checkbox"
+  >("text");
   return (
-    <Button variant="filled" type="submit" loading={status.pending}>
-      Publish Survey
-    </Button>
+    <Box
+      onClick={() => {
+        if (disabled) {
+          notifications.show({
+            title: "Error",
+            message:
+              "Cannot add initial form because the survey already has respondent",
+            color: "red",
+          });
+        }
+      }}
+    >
+      <Stack>
+        <Flex align="flex-end" gap="sm">
+          <TextInput
+            label="Initial Form"
+            description="Add initial form for the survey. This form will showed up before conversation begin"
+            placeholder="ex: Name, Email, Date of Birth, etc"
+            flex={1}
+            disabled={disabled}
+            value={currentInput}
+            onChange={(event) => setCurrentInput(event.currentTarget.value)}
+          />
+          <NativeSelect
+            label="Type"
+            data={[
+              { value: "text", label: "Text" },
+              { value: "email", label: "Email" },
+              { value: "date", label: "Date" },
+              { value: "checkbox", label: "Checkbox" },
+            ]}
+            value={currentType}
+            disabled={disabled}
+            onChange={(event) =>
+              setCurrentType(event.currentTarget.value as any)
+            }
+          />
+          <Button
+            disabled={currentInput.trim() === "" || disabled}
+            onClick={() => {
+              // dont accept if the title is already in the list
+              if (listInitialForm.some((item) => item.title === currentInput)) {
+                notifications.show({
+                  title: "Error",
+                  message: "Title already exists",
+                  color: "red",
+                });
+                return;
+              }
+
+              setListInitialForm([
+                ...listInitialForm,
+                {
+                  title: currentInput,
+                  type: currentType,
+                },
+              ]);
+              setCurrentInput("");
+            }}
+          >
+            Add
+          </Button>
+        </Flex>
+      </Stack>
+      {listInitialForm.length > 0 ? (
+        <Stack gap="sm" my="sm">
+          {listInitialForm.map((item, index) => (
+            <Stack key={index} gap="xs">
+              <Flex gap="xs" align="center" justify="space-between">
+                <Flex gap="xs" align="center">
+                  <Text c="dimmed">{index + 1}.</Text>
+                  <Text>{item.title}</Text>
+                  <Badge variant="light">
+                    {item.type}
+                  </Badge>
+                </Flex>
+                <ActionIcon
+                  variant="white"
+                  aria-label={`Remove ${item.title}`}
+                  disabled={disabled}
+                  onClick={() => {
+                    setListInitialForm(
+                      listInitialForm.filter((_, i) => i !== index)
+                    );
+                  }}
+                  color="dark"
+                >
+                  <IconX style={{ width: "70%", height: "70%" }} />
+                </ActionIcon>
+              </Flex>
+              <Divider />
+            </Stack>
+          ))}
+        </Stack>
+      ) : null}
+    </Box>
   );
 }

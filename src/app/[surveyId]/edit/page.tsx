@@ -3,7 +3,7 @@ import { Container, Stack, Text, Title } from "@mantine/core";
 import { notFound, redirect } from "next/navigation";
 import SurveyEditForm from "./survey-edit-form";
 import { db } from "@/lib/drizzle/db";
-import { survey } from "@/lib/drizzle/schema";
+import { conversation, survey } from "@/lib/drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export default async function Page({
@@ -19,26 +19,34 @@ export default async function Page({
     redirect("/api/auth/login?post_login_redirect_url=/");
   }
 
-  const currentSurvey = await db
+  const res = await db
     .select()
     .from(survey)
+    .leftJoin(conversation, eq(survey.id, conversation.surveyId))
     .where(eq(survey.id, params.surveyId))
     .get();
 
-  if (!currentSurvey) {
+  if (!res) {
     notFound();
   }
 
-  if (currentSurvey.isActive) {
+  if (res.survey.isActive) {
     return <Text>Survey need to be deactivated before editing.</Text>;
   }
 
-  const isCreate = searchParams?.create === "true";
+  let isCreate = searchParams?.create === "true";
+
+  if (isCreate && res.conversation) {
+    isCreate = false;
+  }
 
   return (
     <Stack>
       <Title>{isCreate ? "Create new survey" : "Edit survey"}</Title>
-      <SurveyEditForm survey={currentSurvey} />
+      <SurveyEditForm
+        survey={res.survey}
+        alreadyHasRespondent={res.conversation !== null}
+      />
     </Stack>
   );
 }

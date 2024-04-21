@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/drizzle/db";
 import { survey } from "@/lib/drizzle/schema";
-import { ask } from "@/lib/openai";
+import { action } from "@/lib/safe-action";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -16,54 +16,30 @@ const schema = z.object({
   objectives: z.string().min(3).max(1000),
   targetAudiences: z.string().min(3).max(1000),
   preferredLanguages: z.string().min(3).max(1000),
+  initialFormJson: z.string().default("[]"),
 });
 
-export async function updateSurvey(_: any, formData: FormData) {
+export const updateSurvey = action(schema, async (formData) => {
   const { getUser } = getKindeServerSession();
 
   const user = await getUser();
 
   if (!user) {
     return {
-      isError: true,
-      text: "Unauthorized",
-    };
-  }
-
-  console.log("test");
-
-  const validated = schema.safeParse({
-    id: formData.get("id"),
-    title: formData.get("title"),
-    description: formData.get("description"),
-    background: formData.get("background"),
-    objectives: formData.get("objectives"),
-    targetAudiences: formData.get("targetAudiences"),
-    preferredLanguages: formData.get("preferredLanguages"),
-  });
-
-  if (!validated.success) {
-    return {
-      errors: validated.error.flatten().fieldErrors,
-      data: null,
+      failure: "User not found",
     };
   }
 
   const res = await db.update(survey).set({
     userId: user.id,
-    ...validated.data,
-    initialFormJson: "{}", // TODO: add proper form json
-    isActive: true,
-  }).where(and(eq(survey.id, validated.data.id), eq(survey.userId, user.id)));
+    ...formData,
+  }).where(and(eq(survey.id, formData.id), eq(survey.userId, user.id)));
 
   if (res.rowsAffected !== 1) {
     return {
-      message: {
-        isError: true,
-        text: "Error creating survey",
-      },
+      failure: "Survey not found",
     };
   }
 
-  redirect("/");
-}
+  redirect("/" + formData.id);
+});
