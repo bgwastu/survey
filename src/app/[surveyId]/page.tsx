@@ -3,16 +3,30 @@ import { conversation, survey } from "@/lib/drizzle/schema";
 import { css } from "@/styled-system/css";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import {
+  Badge,
   Box,
   Button,
+  CopyButton,
+  Divider,
   Flex,
+  Group,
   Stack,
+  Switch,
   Text,
-  Title
+  Title,
 } from "@mantine/core";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import ShareSurveyButton from "./share-survey-button";
+import {
+  IconCircleOff,
+  IconCircleX,
+  IconFlagX,
+  IconSquareX,
+  IconTableOff,
+  IconX,
+} from "@tabler/icons-react";
 
 export default async function Page({
   params,
@@ -43,7 +57,29 @@ export default async function Page({
 
   return (
     <Stack>
-      <Title>{currentSurvey.title}</Title>
+      <Stack gap={4}>
+        <Title>{currentSurvey.title}</Title>
+        <Text className={css({ whiteSpace: "pre-wrap" })}>
+          {currentSurvey.description}
+        </Text>
+        <Group gap="xs">
+          <Badge
+            variant="dot"
+            color={survey.isActive ? "green" : "red"}
+            size="md"
+          >
+            {survey.isActive ? "Survey Active" : "Survey Closed"}
+          </Badge>
+          <Button
+            variant="subtle"
+            color="red"
+            leftSection={<IconFlagX style={{ width: 16 }} />}
+          >
+            Close Survey
+          </Button>
+        </Group>
+      </Stack>
+
       <Box>
         <Text fw="bold">Background:</Text>
         <Text className={css({ whiteSpace: "pre-wrap" })}>
@@ -57,6 +93,24 @@ export default async function Page({
         </Text>
       </Box>
       <Box>
+        <Text fw="bold">Target Audiences:</Text>
+        <Text className={css({ whiteSpace: "pre-wrap" })}>
+          {currentSurvey.targetAudiences}
+        </Text>
+      </Box>
+      <Box>
+        <Text fw="bold">Preferred Langauges:</Text>
+        <Group gap="xs">
+          {currentSurvey.preferredLanguages.split(",").map((lang) => {
+            return (
+              <Badge key={lang} variant="light">
+                {lang}
+              </Badge>
+            );
+          })}
+        </Group>
+      </Box>
+      <Box>
         <Text fw="bold">Total Responses:</Text>
         {conversations.length !== 0 ? (
           <Text>{conversations.length}</Text>
@@ -65,14 +119,16 @@ export default async function Page({
         )}
       </Box>
 
-      <Flex gap="sm">
-        <Button component={Link} href={`/s/${currentSurvey.id}`}>
-          Go to survey
-        </Button>
+      <Group gap="sm">
+        <Button>View Survey Result</Button>
+        <ShareSurveyButton surveyId={currentSurvey.id} />
+      </Group>
+      <Divider label="OR" />
+      <Stack>
         <Button color="red" variant="outline">
           Remove Survey
         </Button>
-      </Flex>
+      </Stack>
     </Stack>
   );
 }
