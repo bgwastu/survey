@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "prepare": "panda codegen",
-    "dev": "rm -rf .next && next dev --turbo",
+    "dev": "next dev",
     "build": "drizzle-kit push:sqlite && next build",
     "start": "next start",
     "lint": "next lint",
@@ -13,16 +13,19 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^4.2.2",
     "@kinde-oss/kinde-auth-nextjs": "^2.2.2",
     "@langchain/core": "^0.1.58",
     "@langchain/openai": "^0.0.28",
     "@libsql/client": "^0.6.0",
     "@mantine/core": "^7.7.1",
+    "@mantine/dates": "^7.8.0",
     "@mantine/form": "^7.7.1",
     "@mantine/hooks": "^7.7.1",
     "@mantine/notifications": "^7.7.1",
     "@tabler/icons-react": "^3.1.0",
     "ai": "^3.0.16",
+    "dayjs": "^1.11.10",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.8",
     "install": "^0.13.0",
@@ -33,7 +36,8 @@
     "openai": "^4.31.0",
     "react": "^18",
     "react-dom": "^18",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zod-form-data": "^2.0.2"
   },
   "devDependencies": {
     "@pandacss/dev": "^0.36.1",

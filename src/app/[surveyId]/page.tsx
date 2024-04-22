@@ -1,9 +1,9 @@
 import { db } from "@/lib/drizzle/db";
 import { conversation, survey } from "@/lib/drizzle/schema";
+import { InitialForm } from "@/lib/types";
 import { css } from "@/styled-system/css";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import {
-  ActionIcon,
   Badge,
   Box,
   Button,
@@ -20,8 +20,6 @@ import { notFound, redirect } from "next/navigation";
 import CloseSurveyButton from "./close-survey-button";
 import DeleteSurveyButton from "./delete-survey-button";
 import ShareSurveyButton from "./share-survey-button";
-import { IconX } from "@tabler/icons-react";
-import { index } from "drizzle-orm/mysql-core";
 
 export default async function Page({
   params,
@@ -109,13 +107,11 @@ export default async function Page({
         ) : (
           <Stack gap={4}>
             {JSON.parse(currentSurvey.initialFormJson).map(
-              (form: any, index: number) => (
-                <Flex key={form.title} gap="xs" align="center">
+              (form: InitialForm, index: number) => (
+                <Flex key={form.id} gap="xs" align="center">
                   <Text c="dimmed">{index + 1}.</Text>
                   <Text>{form.title}</Text>
-                  <Badge variant="light">
-                    {form.type}
-                  </Badge>
+                  <Badge variant="light">{form.type}</Badge>
                 </Flex>
               )
             )}
@@ -123,12 +119,21 @@ export default async function Page({
         )}
       </Box>
       <Box>
-        <Text fw="bold">Total Responses:</Text>
-        {conversations.length !== 0 ? (
-          <Text>{conversations.length}</Text>
-        ) : (
-          <Text>No Data</Text>
-        )}
+        <Text fw="bold">Responses</Text>
+        <Text>
+          In-progress:{" "}
+          {
+            conversations.filter((c) => !c.chatHistoryJson.includes("[STOP]"))
+              .length
+          }
+        </Text>
+        <Text>
+          Finished:{" "}
+          {
+            conversations.filter((c) => c.chatHistoryJson.includes("[STOP]"))
+              .length
+          }
+        </Text>
       </Box>
 
       <Group gap="sm">

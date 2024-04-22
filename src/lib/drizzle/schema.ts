@@ -27,6 +27,7 @@ export const conversation = sqliteTable("conversation", {
   fingerprintId: text("fingerprint_id").notNull(),
   surveyId: text("survey_id").references(() => survey.id),
   chatHistoryJson: text("chat_history_json").notNull(),
+  initialFormDataJson: text("initial_form_data_json").notNull().default("{}"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 

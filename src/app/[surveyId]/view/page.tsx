@@ -1,9 +1,11 @@
 import { db } from "@/lib/drizzle/db";
-import { survey } from "@/lib/drizzle/schema";
-import { Stack, Text } from "@mantine/core";
+import { conversation, survey } from "@/lib/drizzle/schema";
+import { Stack, Text, Title } from "@mantine/core";
 import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import ChatPage from "./chat-page";
+import InitialForm from "./initial-form";
 
 export default async function Page({
   params,
@@ -11,11 +13,7 @@ export default async function Page({
   params: { surveyId: string };
 }) {
   const currentSurvey = await db
-    .select({
-      id: survey.id,
-      title: survey.title,
-      isActive: survey.isActive,
-    })
+    .select()
     .from(survey)
     .where(eq(survey.id, params.surveyId))
     .get();
@@ -32,11 +30,43 @@ export default async function Page({
     );
   }
 
-  // TODO: add initial form
+  const hasInitialForm = currentSurvey.initialFormJson !== "[]";
+
+  const cid = cookies().get(currentSurvey.id)?.value;
+
+  if (cid !== undefined) {
+    const currentConversation = await db
+      .select()
+      .from(conversation)
+      .where(eq(conversation.id, cid))
+      .get();
+
+    if (currentConversation === undefined) {
+      notFound();
+    }
+
+    const chatHistory = JSON.parse(currentConversation.chatHistoryJson);
+
+    return (
+      <ChatPage
+        conversationId={currentConversation.id}
+        surveyId={currentSurvey.id}
+        chatHistory={chatHistory}
+      />
+    );
+  }
 
   return (
     <Stack>
-      <ChatPage surveyId={currentSurvey.id} surveyTitle={currentSurvey.title} />
+      <Stack gap={4}>
+        <Title>{currentSurvey.title}</Title>
+        <Text>{currentSurvey.description}</Text>
+      </Stack>
+      <InitialForm
+        preferredLanguageList={currentSurvey.preferredLanguages.split(",")}
+        surveyId={currentSurvey.id}
+        initialFormList={JSON.parse(currentSurvey.initialFormJson)}
+      />
     </Stack>
   );
 }

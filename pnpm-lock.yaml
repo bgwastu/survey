@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@fingerprintjs/fingerprintjs':
+    specifier: ^4.2.2
+    version: 4.2.2
   '@kinde-oss/kinde-auth-nextjs':
     specifier: ^2.2.2
     version: 2.2.2(@babel/core@7.24.3)(next@14.1.4)(react-dom@18.2.0)(react@18.2.0)
@@ -20,6 +23,9 @@ dependencies:
   '@mantine/core':
     specifier: ^7.7.1
     version: 7.7.1(@mantine/hooks@7.7.1)(@types/react@18.2.73)(react-dom@18.2.0)(react@18.2.0)
+  '@mantine/dates':
+    specifier: ^7.8.0
+    version: 7.8.0(@mantine/core@7.7.1)(@mantine/hooks@7.7.1)(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0)
   '@mantine/form':
     specifier: ^7.7.1
     version: 7.7.1(react@18.2.0)
@@ -35,6 +41,9 @@ dependencies:
   ai:
     specifier: ^3.0.16
     version: 3.0.16(react@18.2.0)(solid-js@1.8.16)(svelte@4.2.12)(vue@3.4.21)(zod@3.22.4)
+  dayjs:
+    specifier: ^1.11.10
+    version: 1.11.10
   dotenv:
     specifier: ^16.4.5
     version: 16.4.5
@@ -68,6 +77,9 @@ dependencies:
   zod:
     specifier: ^3.22.4
     version: 3.22.4
+  zod-form-data:
+    specifier: ^2.0.2
+    version: 2.0.2(zod@3.22.4)
 
 devDependencies:
   '@pandacss/dev':
@@ -2043,6 +2055,12 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
+  /@fingerprintjs/fingerprintjs@4.2.2:
+    resolution: {integrity: sha512-scD+pDgNZW78LuFAr7ms2yxmDx2NWC4+K5iiOjPT2ZlTlHFbLsORUzLJI2rcKicxxLtHbvf3A7BU1drVr4iHGg==}
+    dependencies:
+      tslib: 2.6.2
+    dev: false
+
   /@floating-ui/core@1.6.0:
     resolution: {integrity: sha512-PcF++MykgmTj3CIyOQbKA/hDzOAiqI3mhuoN44WRCopIs1sgoDoU4oty4Jtqaj/y3oDU6fnVSm4QG0a3t5i0+g==}
     dependencies:
@@ -2628,6 +2646,23 @@ packages:
       type-fest: 4.14.0
     transitivePeerDependencies:
       - '@types/react'
+    dev: false
+
+  /@mantine/dates@7.8.0(@mantine/core@7.7.1)(@mantine/hooks@7.7.1)(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-9jjiYMwP3jQOpOLKkjhp9uf2BGhtEbOnOzyAlpLOS0CJJlYtB0tO6dJ3JaogrOZ/Yfee7ZUBgouCG5EkR4/qtQ==}
+    peerDependencies:
+      '@mantine/core': 7.8.0
+      '@mantine/hooks': 7.8.0
+      dayjs: '>=1.0.0'
+      react: ^18.2.0
+      react-dom: ^18.2.0
+    dependencies:
+      '@mantine/core': 7.7.1(@mantine/hooks@7.7.1)(@types/react@18.2.73)(react-dom@18.2.0)(react@18.2.0)
+      '@mantine/hooks': 7.7.1(react@18.2.0)
+      clsx: 2.1.0
+      dayjs: 1.11.10
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /@mantine/form@7.7.1(react@18.2.0):
@@ -3911,6 +3946,10 @@ packages:
       es-errors: 1.3.0
       is-data-view: 1.0.1
     dev: true
+
+  /dayjs@1.11.10:
+    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
+    dev: false
 
   /debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
@@ -7827,6 +7866,14 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+
+  /zod-form-data@2.0.2(zod@3.22.4):
+    resolution: {integrity: sha512-sKTi+k0fvkxdakD0V5rq+9WVJA3cuTQUfEmNqvHrTzPLvjfLmkkBLfR0ed3qOi9MScJXTHIDH/jUNnEJ3CBX4g==}
+    peerDependencies:
+      zod: '>= 3.11.0'
+    dependencies:
+      zod: 3.22.4
+    dev: false
 
   /zod-to-json-schema@3.22.5(zod@3.22.4):
     resolution: {integrity: sha512-+akaPo6a0zpVCCseDed504KBJUQpEW5QZw7RMneNmKw+fGaML1Z9tUNLnHHAC8x6dzVRO1eB2oEMyZRnuBZg7Q==}

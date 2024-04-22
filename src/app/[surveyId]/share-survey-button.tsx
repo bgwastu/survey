@@ -5,7 +5,9 @@ import { IconCheck, IconCopy } from "@tabler/icons-react";
 
 export default function ShareSurveyButton({ surveyId }: { surveyId: string }) {
   return (
-    <CopyButton value={`${window?.location?.origin}/${surveyId}/view`}>
+    <CopyButton
+      value={`${typeof window !== "undefined" ? window.location.origin : ""}/${surveyId}/view`}
+    >
       {({ copied, copy }) => (
         <Button
           color={copied ? "teal" : "brand"}

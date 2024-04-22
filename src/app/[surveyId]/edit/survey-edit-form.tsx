@@ -22,6 +22,8 @@ import { IconX } from "@tabler/icons-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { updateSurvey } from "./action";
+import { InitialForm } from "@/lib/types";
+import { camelize } from "@/lib/utils";
 
 export default function SurveyEditForm({
   survey,
@@ -154,11 +156,6 @@ export default function SurveyEditForm({
   );
 }
 
-type InitialForm = {
-  title: string;
-  type: "text" | "email" | "date" | "checkbox";
-};
-
 export function InitialFormSelect({
   listInitialForm,
   setListInitialForm,
@@ -169,9 +166,7 @@ export function InitialFormSelect({
   disabled: boolean;
 }) {
   const [currentInput, setCurrentInput] = useState<string>("");
-  const [currentType, setCurrentType] = useState<
-    "text" | "email" | "date" | "checkbox"
-  >("text");
+  const [currentType, setCurrentType] = useState<InitialForm["type"]>("text");
   return (
     <Box
       onClick={() => {
@@ -226,6 +221,7 @@ export function InitialFormSelect({
               setListInitialForm([
                 ...listInitialForm,
                 {
+                  id: camelize(currentInput),
                   title: currentInput,
                   type: currentType,
                 },
@@ -245,9 +241,7 @@ export function InitialFormSelect({
                 <Flex gap="xs" align="center">
                   <Text c="dimmed">{index + 1}.</Text>
                   <Text>{item.title}</Text>
-                  <Badge variant="light">
-                    {item.type}
-                  </Badge>
+                  <Badge variant="light">{item.type}</Badge>
                 </Flex>
                 <ActionIcon
                   variant="white"

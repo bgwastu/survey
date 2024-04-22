@@ -13,22 +13,27 @@ import {
   Center,
 } from "@mantine/core";
 import { IconSend2 } from "@tabler/icons-react";
-import { useChat } from "ai/react";
+import { Message, useChat } from "ai/react";
 import { useEffect, useRef, useState } from "react";
+import { deleteConversation } from "./action";
+import { useShallowEffect } from "@mantine/hooks";
 
 export default function ChatPage({
+  conversationId,
   surveyId,
-  surveyTitle,
+  chatHistory,
 }: {
+  conversationId: string;
   surveyId: string;
-  surveyTitle: string;
+  chatHistory: Message[];
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { formRef, onKeyDown } = useEnterSubmit();
-  const [status, setStatus] = useState<"initial" | "start" | "finish">(
-    "initial"
-  );
+  const [status, setStatus] = useState<
+    "loading" | "initial" | "start" | "finish"
+  >("loading");
+
   const {
     messages,
     input,
@@ -39,11 +44,13 @@ export default function ChatPage({
     setMessages,
   } = useChat({
     body: {
-      surveyId,
+      conversationId,
     },
+    initialMessages: chatHistory,
   });
 
-  function onInit() {
+  async function startConversation() {
+    setStatus("loading");
     setMessages([
       {
         id: "1",
@@ -52,10 +59,25 @@ export default function ChatPage({
       },
     ]);
 
-    reload();
-    setStatus("start");
+    await reload();
     inputRef.current?.focus();
+    setStatus("start");
   }
+
+  useEffect(function setInitialStatus() {
+    if (chatHistory.length === 0) {
+      setStatus("initial");
+      return;
+    }
+
+    const lastMesage = messages[messages.length - 1];
+    if (lastMesage.content.includes("[STOP]")) {
+      setStatus("finish");
+      return;
+    }
+
+    setStatus("start");
+  }, []);
 
   useEffect(
     function scrollToBottom() {
@@ -81,14 +103,15 @@ export default function ChatPage({
     [messages]
   );
 
-  if (status === "initial") {
-    return (
-      <Stack>
-        <Text>You are about to start a survey titled &quot;{surveyTitle}&quot;.</Text>
-        <Text>Clik the button below to start the survey.</Text>
-        <Button onClick={onInit}>Start Survey</Button>
-      </Stack>
-    );
+  async function restartFromBeginning() {
+    //  are you sure?
+    if (
+      confirm(
+        "Are you sure you want to restart from the beginning? You will lose all progress."
+      )
+    ) {
+      await deleteConversation({ conversationId, surveyId });
+    }
   }
 
   return (
@@ -99,25 +122,32 @@ export default function ChatPage({
             .filter((v) => {
               return v.content !== "[BEGIN]";
             })
-            .map((m) => (
-              <div
-                key={m.id}
-                className={css({
-                  whiteSpace: "pre-wrap",
-                  fontWeight: m.role === "user" ? "600" : "normal",
-                  overflowAnchor: "auto !important",
-                })}
-              >
-                {m.role === "user" ? "User: " : "AI: "}
-                {m.content.replace("[STOP]", "").trim()}
-              </div>
-            ))}
+            .map((m, i) => {
+              return (
+                <div
+                  key={i}
+                  className={css({
+                    whiteSpace: "pre-wrap",
+                    fontWeight: m.role === "user" ? "600" : "normal",
+                    overflowAnchor: "auto !important",
+                  })}
+                >
+                  {m.role === "user" ? "User: " : "AI: "}
+                  {m.content.replace("[STOP]", "").trim()}
+                </div>
+              );
+            })}
         </Stack>
       </ScrollArea>
-      {status === "finish" ? (
-        <Center>
+      {status === "initial" ? (
+        <Button onClick={startConversation}>Start conversation</Button>
+      ) : status === "finish" ? (
+        <Stack align="center">
           <Text>Thank you for your time!</Text>
-        </Center>
+          <Button onClick={restartFromBeginning} variant="outline">
+            Restart from beginning
+          </Button>
+        </Stack>
       ) : (
         <form onSubmit={handleSubmit} ref={formRef}>
           <Flex gap="sm">
@@ -125,7 +155,7 @@ export default function ChatPage({
               value={input}
               placeholder="Send a message"
               onChange={handleInputChange}
-              disabled={isLoading}
+              disabled={isLoading || status === "loading"}
               onKeyDown={onKeyDown}
               rightSectionWidth={50}
               ref={inputRef}
@@ -142,6 +172,11 @@ export default function ChatPage({
               }
             />
           </Flex>
+          {isLoading || status === "loading" ? (
+            <Text size="sm" c="dimmed">
+              Loading...
+            </Text>
+          ) : null}
         </form>
       )}
     </Stack>

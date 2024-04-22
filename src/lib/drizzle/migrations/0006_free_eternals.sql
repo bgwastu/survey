@@ -1,0 +1,1 @@
+ALTER TABLE conversation ADD `initial_form_data_json` text DEFAULT '{}' NOT NULL;

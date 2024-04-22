@@ -1,6 +1,7 @@
 import "./index.css";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import '@mantine/dates/styles.css';
 import type { Metadata } from "next";
 import { Notifications } from "@mantine/notifications";
 import {

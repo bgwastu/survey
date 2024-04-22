@@ -43,6 +43,13 @@
       "when": 1713454607473,
       "tag": "0005_brief_fenris",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1713756464898,
+      "tag": "0006_free_eternals",
+      "breakpoints": true
     }
   ]
 }

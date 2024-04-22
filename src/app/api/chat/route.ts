@@ -7,11 +7,15 @@ import { and, eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
   try {
-    const { messages, surveyId } = await req.json();
+    const { messages, conversationId } = await req.json();
 
-    const currentSurvey = await db.select().from(survey).where(
-      and(eq(survey.id, surveyId), eq(survey.isActive, true)),
-    ).get();
+    const res = await db.select().from(conversation).where(
+      eq(conversation.id, conversationId),
+    )
+      .innerJoin(survey, eq(survey.id, conversation.surveyId))
+      .get();
+
+    const currentSurvey = res?.survey;
 
     if (!currentSurvey) {
       return Response.json({ error: "Survey not found" }, { status: 404 });
@@ -20,22 +24,32 @@ export async function POST(req: Request) {
     const system: OpenAI.Chat.Completions.ChatCompletionMessageParam = {
       role: "system",
       content:
-        `You are an AI assistant designed to conduct an open-ended survey titled ${currentSurvey.title}. Your role is to interview the user, asking questions that encourage them to share their thoughts, experiences, and opinions related to the survey topic. 
+        `You are an AI assistant who conduct survey titled ${currentSurvey.title}. Your role is to interview the user, asking questions that encourage them to share their thoughts, experiences, and opinions based on the survey objectives. The user's responses will help the surveyor to gather insights and feedback.
 
       Survey Background:
       ${currentSurvey.background}
       
       Survey Objectives:
       ${currentSurvey.objectives}
+
+      Current user type detail:
+      ${currentSurvey.targetAudiences}
+
+      More data that user has provided:
+      ${
+          Object.entries(JSON.parse(res.conversation.initialFormDataJson)).map((
+            [key, value],
+          ) => `${key}: ${value}`).join(", ")
+        }
       
-      During the conversation, keep the following in mind:
-      - Welcome the user and ask the first question when they say "[BEGIN]".
-      - Be curious, attentive, and maintain engagement.
+      Notes:
+      - Greet and welcome the user if the user says "[BEGIN]".
+      - Use ${JSON.parse(res.conversation.initialFormDataJson)["preferredLanguage"]} language when conducting the interview.
+      - Make interview sessions short yet engaging.
+      - Ask question just how like a real conversation would be.
       - Ask follow-up questions to encourage elaboration.
-      - Provide clarification when needed.
-      - Ensure all objectives are addressed.
-      - Respond with "[STOP]" when all objectives are fulfilled.
-      - Maintain a conversational tone as if you were chatting through a messaging app.
+      - Lead the conversation from basic questions to more specific ones, make sure to cover all objectives.
+      - Respond with "[STOP]" with a closing message and follow-up based on survey objectives if all objectives are met.
       
       Ensure that all objectives are met while maintaining a conversational and engaging tone.`,
     };
@@ -48,15 +62,16 @@ export async function POST(req: Request) {
 
     const stream = OpenAIStream(response, {
       onCompletion: async (completion) => {
-        const isFinished = completion.includes("[STOP]");
-
-        // Save the conversation to the database
-        if (isFinished) {
-          await db.insert(conversation).values({
-            surveyId: currentSurvey.id,
-            chatHistoryJson: JSON.stringify(messages),
-          });
-        }
+        // Update the conversation with the chat history
+        await db.update(conversation)
+          .set({
+            chatHistoryJson: JSON.stringify([...messages, {
+              role: "system",
+              content: completion,
+            }]),
+          })
+          .where(eq(conversation.id, conversationId))
+          .execute();
       },
     });
 
