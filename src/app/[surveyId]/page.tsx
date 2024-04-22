@@ -137,7 +137,9 @@ export default async function Page({
       </Box>
 
       <Group gap="sm">
-        <Button>View Survey Result</Button>
+        <Button component={Link} href={`${currentSurvey.id}/responses`}>
+          View responses
+        </Button>
         <ShareSurveyButton surveyId={currentSurvey.id} />
       </Group>
       <Divider label="OR" />

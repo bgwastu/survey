@@ -17,6 +17,7 @@ import { Message, useChat } from "ai/react";
 import { useEffect, useRef, useState } from "react";
 import { deleteConversation } from "./action";
 import { useShallowEffect } from "@mantine/hooks";
+import ConversationPanel from "../conversation-panel";
 
 export default function ChatPage({
   conversationId,
@@ -118,25 +119,7 @@ export default function ChatPage({
     <Stack align="stretch">
       <ScrollArea h="78vh" offsetScrollbars viewportRef={scrollRef}>
         <Stack flex={1}>
-          {messages
-            .filter((v) => {
-              return v.content !== "[BEGIN]";
-            })
-            .map((m, i) => {
-              return (
-                <div
-                  key={i}
-                  className={css({
-                    whiteSpace: "pre-wrap",
-                    fontWeight: m.role === "user" ? "600" : "normal",
-                    overflowAnchor: "auto !important",
-                  })}
-                >
-                  {m.role === "user" ? "User: " : "AI: "}
-                  {m.content.replace("[STOP]", "").trim()}
-                </div>
-              );
-            })}
+          <ConversationPanel messages={messages}/>
         </Stack>
       </ScrollArea>
       {status === "initial" ? (
