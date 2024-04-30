@@ -1,3 +1,3 @@
 # Survey App
 
-Still on progress.
+Currently in exploration phase, expect to see dumb things.
